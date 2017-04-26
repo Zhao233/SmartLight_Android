@@ -1,7 +1,6 @@
 package com.example.admin.smartlight.Controller_Data.Grid;
 
 import android.content.Context;
-import android.media.Image;
 import android.util.Log;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -12,7 +11,6 @@ import com.example.admin.smartlight.R;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Observer;
 
 /**
  * Created by admin on 2016/11/21.
@@ -96,7 +94,7 @@ public class SetGrid {
 
     public SimpleAdapter setAdapter(){
         addData(src, number);
-        adapter = new SimpleAdapter(context,getDataSource(),R.layout.item_show_mould,from,to);
+        adapter = new SimpleAdapter(context,getDataSource(),R.layout.chose_moudle_item,from,to);
         return adapter;
     }
 

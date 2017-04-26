@@ -3,9 +3,14 @@ package com.example.admin.smartlight.Controller_Bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Handler;
 import android.widget.Toast;
+
+import com.example.admin.smartlight.Controller_Data.List.SetList;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,17 +24,48 @@ import java.util.UUID;
  * Created by admin on 2016/9/10.
  */
 public class BlueTooth extends Observable {
+    public SetList listAdapter;
+
     private BluetoothAdapter BA;
     private Set<BluetoothDevice> pairedDevices;
+    private ArrayList<BluetoothDevice> remoteDevice;
     private BluetoothSocket bluetoothSocket;
     private Context context;
+    private Handler handler;
 
-    public BlueTooth(Context newContext) {
+    private static final int SCAN_DELAY = 3000;
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                if( !remoteDevice.contains(device) ){
+                    remoteDevice.add(device);
+                    listAdapter.addData(device.getName(), device.getAddress());
+                }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED
+                    .equals(action)) {
+                BA.cancelDiscovery();
+            }
+        }
+    };
+
+
+    public BlueTooth(Context newContext, Handler newHandle, SetList list) {
+        this.handler = newHandle;
         BA = BluetoothAdapter.getDefaultAdapter();
 
         pairedDevices = BA.getBondedDevices();
 
+        remoteDevice = new ArrayList<>();
+
         this.context = newContext;
+
+        listAdapter = list;
 
         /*AcceptThread a = new AcceptThread();
         a.start();*/
@@ -91,8 +127,21 @@ public class BlueTooth extends Observable {
         return list;
     }
 
+    public void ScanDevice(){
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, "停止扫描", Toast.LENGTH_SHORT).show();
+                BA.cancelDiscovery();
+                registerBroadcast();
+            }
+        }, SCAN_DELAY);
+
+        getBluetoothAdapter().startDiscovery();
+        registerBroadcast();
+    }
+
     public boolean connect(BluetoothDevice device) throws IOException {
-        getBluetoothAdapter().cancelDiscovery();
         final String SPP_UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
         UUID uuid = UUID.fromString(SPP_UUID);
@@ -110,7 +159,6 @@ public class BlueTooth extends Observable {
             BluetoothDevice b = null;
             if (socket.getRemoteDevice() != null) {
                 b = socket.getRemoteDevice();
-                Toast.makeText(context, b.getName(), Toast.LENGTH_SHORT).show();
             }
 
         } catch (IOException e) {
@@ -146,18 +194,7 @@ public class BlueTooth extends Observable {
     }
 
     public BluetoothDevice getBluetoothDevice(int position) {
-        int i = 0;
-        BluetoothDevice bl = null;
-
-        for (BluetoothDevice bld : pairedDevices) {
-            bl = bld;
-            if (position == i) {
-                break;
-            }
-            i++;
-        }
-
-        return bl;
+        return remoteDevice.get(position);
     }
 
     /*发送byte数组*/
@@ -222,12 +259,14 @@ public class BlueTooth extends Observable {
         return BA.isEnabled();
     }
 
-    /****************Observable****************/
-    public void update(BluetoothAdapter tempBA){ //观察蓝牙是否已经打开
-        if(tempBA.enable() != this.BA.enable()){
-            setChanged();
-            notifyObservers();
-        }
+    private void registerBroadcast() {
+        // Register for broadcasts when a device is discovered
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        context.registerReceiver(mReceiver, filter);
+
+        // Register for broadcasts when discovery has finished
+        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        context.registerReceiver(mReceiver, filter);
     }
 
 }

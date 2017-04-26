@@ -10,8 +10,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name="com.example.admin.smartlight.View.BluetoothConnection">
+        android:theme="@android:style/Theme.Holo">
+        <activity android:name="com.example.admin.smartlight.View.BluetoothConnection"
+            android:theme="@android:style/Theme.Holo"
+            android:icon="@drawable/round">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,11 +21,28 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.example.admin.smartlight.View.show_Mould">
+        <activity android:name="com.example.admin.smartlight.View.choseMode"
+            android:theme="@android:style/Theme.Holo"
+            android:icon="@drawable/round">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="com.example.admin.smartlight.View.createMode.createMode_create"
+                  android:theme="@android:style/Theme.Holo"
+            android:icon="@drawable/round">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.example.admin.smartlight.View.useMoudle.show_Mould">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

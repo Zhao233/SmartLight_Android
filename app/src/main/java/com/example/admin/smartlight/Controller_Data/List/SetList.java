@@ -28,6 +28,8 @@ public class SetList {
     public SetList(ListView newListView, Context newContext) {
         this.listView = newListView;
         this.context = newContext;
+
+        setAdapter();
     }
 
     public SetList(ListView newListView, Context newContext, ArrayList<String> names, ArrayList<String> address) {
@@ -94,7 +96,6 @@ public class SetList {
 
         setAdapter();
     } // add the name one by one and put this list to the adapter
-
     public void addData(ArrayList<String> names, ArrayList<String> address) {// if judge = 0, do not set the adapter if = 1, set the adapter
         for (int i = 0; i < names.size(); i++) {
             HashMap<String, String> map = new HashMap<String, String>();
@@ -105,6 +106,14 @@ public class SetList {
         }
         setAdapter();
     } // add the name as a list and put this list to the adapter
+    public void addData(String name, String address){
+        HashMap<String, String> map = new HashMap<>();
+        map.put("Names", name);
+        map.put("Address", address);
+
+        list.add(map);
+        adapter.notifyDataSetChanged();
+    }
 
     public void setAdapter() {
         adapter = new SimpleAdapter(context, getData(), R.layout.item_show_connnection, from, to);

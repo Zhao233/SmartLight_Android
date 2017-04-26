@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.example.admin.smartlight.Controller_Bluetooth.BlueTooth;
 import com.example.admin.smartlight.Controller_Data.List.SetList;
 import com.example.admin.smartlight.R;
+import com.example.admin.smartlight.View.useMoudle.show_Mould;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,14 +41,14 @@ public class BluetoothConnection extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bluetooth_connection);
-
-        blueTooth = new BlueTooth(this);
         context = this;
         handle = new Handler();
 
         listView = (ListView)findViewById(R.id.show_buletoothDevice);
         button_Scan = (Button)findViewById(R.id.scanButton);
+        list_show = new SetList(listView, context);//show a empty view before scan
 
+        blueTooth = new BlueTooth(this, new Handler(), list_show);
         button_Scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,21 +57,20 @@ public class BluetoothConnection extends Activity{
 
                     startActivity(blueTooth.On());//打开蓝牙
                 }
-                blueTooth.updata();
 
-                names = blueTooth.getNamesOfBluetoothDevice();
-                address = blueTooth.getAddressOfBluetoothDevice();
-                list_show = new SetList(listView, context, names, address); //show the List
+                Toast.makeText(context,"扫描中....",Toast.LENGTH_LONG).show();
+                blueTooth.ScanDevice();
             }
         });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(context,String.valueOf(position),Toast.LENGTH_SHORT).show();
+                Toast.makeText(context,"connecting",Toast.LENGTH_LONG).show();
+                Log.i("connecting",String.valueOf(position));
                 try {
-
                     if( blueTooth.connect(blueTooth.getBluetoothDevice(position)) ){
+                        Toast.makeText(context, "连接成功", Toast.LENGTH_SHORT).show();
                         new timeCounter(handle).start();
                     }
                 } catch (IOException e) {
@@ -91,10 +91,10 @@ public class BluetoothConnection extends Activity{
         @Override
         public void run(){
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
 
                 Intent intent =new Intent();
-                intent.setClass(BluetoothConnection.this, show_Mould.class);
+                intent.setClass(BluetoothConnection.this, choseMode.class);
                 startActivity(intent);
             } catch (InterruptedException e) {
                 e.printStackTrace();
